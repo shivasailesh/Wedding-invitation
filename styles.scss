@@ -1,0 +1,335 @@
+// ============================================
+// Emma & James — Wedding Countdown
+// SCSS source. Compile to styles.css with:
+//   npx sass styles.scss styles.css
+// ============================================
+
+// ---- Layout constants (compile-time) ----
+$max-width: 600px;
+$font-body:  serif;
+$font-display: serif;
+$font-script: serif;
+
+// ---- Theme tokens (runtime CSS custom properties, so they stay
+//      swappable via prefers-color-scheme / data-theme) ----
+:root {
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  --bg: #ffffff;
+  --bg-alt: #ffffff;
+  --ink: #2e2426;
+  --gold: #a97e2f;
+  --gold-light: #dcb968;
+  --wine: #7a2942;
+  --blush: #e7bfc0;
+  --card: #ffffff;
+}
+
+html {
+  scroll-padding-top: env(safe-area-inset-top, 0px);
+  scroll-behavior: smooth;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #ffffff; --bg-alt: #ffffff; --ink: #2e2426; --gold: #a97e2f;
+    --gold-light: #dcb968; --wine: #7a2942; --blush: #e7bfc0; --card: #ffffff;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #ffffff; --bg-alt: #ffffff; --ink: #2e2426; --gold: #a97e2f;
+  --gold-light: #dcb968; --wine: #7a2942; --blush: #e7bfc0; --card: #ffffff;
+}
+
+* { box-sizing: inherit; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: $font-body;
+  font-size: 21px;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+a { color: inherit; }
+
+section {
+  position: relative;
+  max-width: $max-width;
+  margin: 0 auto;
+  padding: clamp(48px, 9vw, 72px) clamp(18px, 5vw, 28px);
+  text-align: center;
+  z-index: 1;
+  &.alt-bg { background: var(--bg-alt); }
+}
+
+h2 {
+  font-family: $font-display;
+  font-weight: 600;
+  font-size: clamp(25px, 6.5vw, 34px);
+  margin: 0 0 14px;
+  color: var(--ink);
+}
+
+.subtitle {
+  margin: 0 0 clamp(24px, 5vw, 34px);
+  color: var(--gold);
+  font-style: italic;
+  font-size: clamp(16px, 4vw, 19px);
+}
+
+.btn {
+  display: inline-block;
+  padding: 14px 34px;
+  border: 1px solid var(--gold);
+  background: transparent;
+  color: var(--gold);
+  font-size: 18px;
+  letter-spacing: .03em;
+  text-decoration: none;
+  cursor: pointer;
+  font-family: $font-body;
+  transition: background .25s ease, color .25s ease;
+  &:hover { background: var(--gold); color: #fff; }
+}
+.btn:focus-visible, .music-toggle:focus-visible, .crest:focus-visible {
+  outline: 2px solid var(--wine);
+  outline-offset: 3px;
+}
+
+.divider {
+  width: 56px; height: 1px; background: var(--gold);
+  margin: 0 auto 20px; position: relative;
+  &::after {
+    content: '\2726'; position: absolute; top: -8px; left: 50%;
+    transform: translateX(-50%); color: var(--gold); font-size: 12px;
+    background: inherit; padding: 0 6px;
+  }
+}
+
+.badge {
+  width: 56px; height: 56px; border: 1.5px solid var(--gold); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 16px; background: var(--card);
+  box-shadow: 0 4px 14px rgba(169, 126, 47, .15);
+  svg { width: 24px; height: 24px; color: var(--wine); }
+}
+
+.reveal {
+  opacity: 0; transform: translateY(26px);
+  transition: opacity .9s ease, transform .9s ease;
+  &.visible { opacity: 1; transform: translateY(0); }
+}
+
+// ---- Opening gate ----
+#gate {
+  position: fixed; inset: 0; z-index: 50; overflow: hidden; cursor: pointer;
+}
+.panel {
+  position: absolute; top: 0; bottom: 0; width: 50%;
+  background: linear-gradient(150deg, var(--wine), var(--gold));
+  transition: transform 1.1s cubic-bezier(.65, 0, .35, 1);
+  &.left { left: 0; }
+  &.right { right: 0; }
+}
+#gate.opened {
+  .panel.left { transform: translateX(-100%); }
+  .panel.right { transform: translateX(100%); }
+  .gate-content { opacity: 0; pointer-events: none; }
+}
+.gate-content {
+  position: absolute; inset: 0; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; z-index: 2; text-align: center;
+  padding: 24px; transition: opacity .6s ease;
+}
+.crest {
+  width: 86px; height: 86px; border: 1.5px solid var(--gold-light); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 18px; position: relative; cursor: pointer;
+  animation: sealPulse 2.4s ease-in-out infinite;
+  &::before {
+    content: ''; position: absolute; inset: 6px;
+    border: 1px solid var(--gold-light); border-radius: 50%;
+  }
+  span { font-family: $font-script; color: var(--gold-light); font-size: 28px; }
+}
+@keyframes sealPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+  50% { box-shadow: 0 0 0 10px rgba(255, 255, 255, .10); }
+}
+.g-names {
+  font-family: $font-script; font-size: clamp(44px, 11vw, 76px); color: #fff; margin: 0 0 8px;
+}
+.invite-line {
+  margin: 0 0 26px; letter-spacing: .03em; color: #f6e9d8; font-size: clamp(16px, 4.5vw, 20px);
+}
+.tap-cue { color: var(--gold-light); font-size: 15px; font-style: italic; letter-spacing: .03em; }
+
+// ---- Petals ----
+.petals { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 5; }
+.petal {
+  position: absolute; top: -6%; border-radius: 0 100% 0 100%; opacity: .85;
+  animation: fall linear infinite; background: var(--blush);
+  &.gold { background: var(--gold-light); }
+  &.burst { animation: burst 1.4s ease-out forwards; top: 38%; }
+}
+@keyframes fall {
+  0% { transform: translateY(0) translateX(0) rotate(0deg); opacity: .9; }
+  100% { transform: translateY(112vh) translateX(26px) rotate(320deg); opacity: .2; }
+}
+@keyframes burst {
+  0% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+  100% { transform: translate(var(--dx, 0px), 240px) rotate(360deg); opacity: 0; }
+}
+
+// ---- Hero ----
+.hero {
+  padding-top: clamp(60px, 13vw, 92px); min-height: 52vh;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+.hero-content {
+  opacity: 0; transform: translateY(14px); animation: heroIn 1.3s ease forwards .3s;
+  p { font-size: clamp(18px, 5vw, 36px); letter-spacing: .02em; color: var(--ink); margin: 0 0 10px; }
+  .date-line { font-size: clamp(16px, 4.5vw, 28px); color: var(--gold); font-style: italic; }
+}
+@keyframes heroIn { to { opacity: 1; transform: translateY(0); } }
+.scroll-cue { margin-top: 30px; color: var(--gold); animation: bounce 2s ease-in-out infinite; }
+@keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(9px); } }
+
+// ---- Names reveal ----
+.names-reveal {
+  display: flex; align-items: center; justify-content: center;
+  gap: clamp(8px, 3vw, 16px); flex-wrap: wrap;
+  padding-top: clamp(36px, 7vw, 64px); padding-bottom: clamp(36px, 7vw, 64px);
+  &.visible {
+    .side { opacity: 1; transform: translateX(0); }
+    .amp { opacity: 1; }
+  }
+}
+.side {
+  font-family: $font-script; font-size: clamp(42px, 12vw, 80px); color: var(--wine);
+  opacity: 0; transition: transform 1s ease, opacity 1s ease;
+  &.left { transform: translateX(-46px); }
+  &.right { transform: translateX(46px); }
+}
+.amp {
+  font-family: $font-display; font-size: clamp(26px, 7vw, 40px); color: var(--gold);
+  opacity: 0; transition: opacity 1.1s ease .35s;
+}
+
+// ---- Connectors (petal-marked vine growth) ----
+.connector {
+  max-width: $max-width; margin: 0 auto; height: 48px;
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+  .vine-line {
+    width: 2px; height: 32px; background: linear-gradient(var(--blush), var(--gold));
+    transform: scaleY(0); transform-origin: top; transition: transform 1.1s ease;
+  }
+  .mark {
+    width: 10px; height: 10px; background: var(--gold); border-radius: 0 100% 0 100%;
+    transform: rotate(45deg); opacity: 0; transition: opacity .6s ease .9s; margin-top: -2px;
+  }
+  &.grow {
+    .vine-line { transform: scaleY(1); }
+    .mark { opacity: 1; }
+  }
+}
+
+// ---- Countdown ----
+.countdown-grid { display: flex; justify-content: center; gap: clamp(10px, 3vw, 18px); flex-wrap: wrap; }
+.cbox {
+  background: var(--card); border: 1px solid var(--gold-light);
+  padding: clamp(14px, 3.5vw, 20px) clamp(11px, 3vw, 16px);
+  min-width: 70px; flex: 0 1 84px; box-shadow: 0 8px 22px rgba(169, 126, 47, .10);
+  .num {
+    display: block; font-family: $font-display; font-size: clamp(28px, 7.5vw, 40px);
+    font-variant-numeric: tabular-nums; color: var(--wine); line-height: 1;
+  }
+  .lbl { display: block; font-size: 15px; margin-top: 6px; color: var(--gold); }
+}
+.tick { animation: tickPulse .4s ease-out; }
+@keyframes tickPulse {
+  0% { transform: scale(1.16); opacity: .55; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+// ---- Photo gallery ----
+.frame {
+  width: min(260px, 70vw); aspect-ratio: 6/7; margin: 0 auto 18px; position: relative;
+  border: 1.5px solid var(--gold); background: var(--bg-alt);
+  box-shadow: 0 12px 30px rgba(122, 41, 66, .12); overflow: hidden;
+  section.alt-bg & { background: var(--card); }
+}
+.slide {
+  position: absolute; inset: 0; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 10px; padding: 16px;
+  opacity: 0; transition: opacity .8s ease;
+  &.active { opacity: 1; }
+  svg { width: 46px; height: 46px; color: var(--wine); }
+  p { margin: 0; font-style: italic; color: var(--wine); font-size: 16px; }
+}
+.slide-photo {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; z-index: 1;
+}
+.map-preview {
+  width: 100%; max-width: 340px; margin: 0 auto 22px;
+  border: 1px solid var(--gold-light); overflow: hidden;
+  img { width: 100%; display: block; }
+}
+.corner {
+  position: absolute; width: 16px; height: 16px; border: 2px solid var(--gold); z-index: 2;
+  &.tl { top: -6px; left: -6px; border-right: none; border-bottom: none; }
+  &.tr { top: -6px; right: -6px; border-left: none; border-bottom: none; }
+  &.bl { bottom: -6px; left: -6px; border-right: none; border-top: none; }
+  &.br { bottom: -6px; right: -6px; border-left: none; border-top: none; }
+}
+.dots { display: flex; justify-content: center; gap: 8px; }
+.dot {
+  width: 8px; height: 8px; border-radius: 50%; background: var(--gold-light);
+  opacity: .45; cursor: pointer; border: none; padding: 0;
+  &.active { opacity: 1; background: var(--wine); }
+}
+
+// ---- Schedule ----
+.event {
+  margin-bottom: 28px; text-align: center;
+  &:last-child { margin-bottom: 0; }
+  .time { display: block; color: var(--gold); font-size: 15px; letter-spacing: .05em; margin-bottom: 4px; }
+  h3 { font-family: $font-display; font-weight: 600; font-size: 24px; margin: 0 0 6px; color: var(--wine); }
+  p { margin: 0; font-size: 18px; color: var(--ink); }
+}
+
+// ---- Location ----
+.venue { font-family: $font-display; font-size: clamp(23px, 6vw, 29px); color: var(--wine); margin: 0 0 6px; }
+.address { margin: 0 0 26px; color: var(--ink); font-size: clamp(18px, 4.5vw, 21px); }
+
+// ---- Footer / music toggle ----
+footer {
+  text-align: center; padding: 40px 24px calc(96px + env(safe-area-inset-bottom, 0px));
+  color: var(--gold); font-style: italic; font-size: 19px;
+}
+.music-toggle {
+  position: fixed; right: 16px; bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  background: var(--card); border: 1px solid var(--gold-light); color: var(--gold);
+  padding: 9px 16px; border-radius: 30px; font-family: $font-body; font-size: 14px;
+  cursor: pointer; z-index: 10; box-shadow: 0 4px 14px rgba(0, 0, 0, .1);
+}
+
+// ---- Responsive / accessibility ----
+@media (max-width: 400px) {
+  .countdown-grid { gap: 8px; }
+  .cbox { min-width: 62px; padding: 12px 8px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .petal { display: none; }
+  .connector .vine-line, .connector .mark, .side, .amp, .reveal {
+    transition: none; transform: none; opacity: 1;
+  }
+  .hero-content, .scroll-cue, .crest { animation: none; opacity: 1; transform: none; }
+  .tick { animation: none; }
+  .panel { transition: none; }
+  .slide { transition: none; }
+}
