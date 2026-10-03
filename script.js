@@ -29,7 +29,7 @@ function spawnBurst(n) {
 }
 
 // ---- Countdown ----
-const weddingDate = new Date('2026-11-11T10:00:00'); // <-- edit this to the real date/time
+const weddingDate = new Date('2026-11-11T09:05:00'); // Muhurtham: Wed 11 Nov 2026, 9:05 AM
 
 function setVal(id, val) {
   const el = document.getElementById(id);

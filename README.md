@@ -1,4 +1,4 @@
-# Emma & James — Wedding Countdown (source)
+# Rishi & Vishnupriya — Wedding Countdown (source)
 
 ## Files
 - `index.html` — page structure/content only
